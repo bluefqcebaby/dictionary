@@ -1,12 +1,17 @@
 import { RouterProvider } from "react-router-dom";
 import { router } from "./routes";
-import { CssBaseline, GeistProvider } from "@geist-ui/core";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ToastContainer } from "react-toastify";
+
+import "react-toastify/dist/ReactToastify.min.css";
+
+const queryClient = new QueryClient();
 
 export const App = () => {
   return (
-    <GeistProvider>
-      <CssBaseline />
+    <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
-    </GeistProvider>
+      <ToastContainer />
+    </QueryClientProvider>
   );
 };

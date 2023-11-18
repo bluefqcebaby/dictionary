@@ -1,20 +1,47 @@
-import { supabase } from "@/db";
-import { Database } from "@/types/db";
-import { Text } from "@geist-ui/core";
-import { useEffect, useState } from "react";
+import { getAvailableLanguages } from "@/api/languages";
+import { KEYS } from "@/constants/keys";
+import { renderErrorToast } from "@/utils/toast/render-error-toast";
+import { useQuery } from "@tanstack/react-query";
+import { useRef } from "react";
+import { toast } from "react-toastify";
 
 export const NewDictionary = () => {
-  const [dictionaries, setDictionaries] = useState<
-    Database["public"]["Tables"]["dictionaries"]["Row"][]
-  >([]);
+  const {
+    data: languages,
+    isError,
+    isLoading,
+    isFetched,
+    error,
+  } = useQuery({
+    queryKey: [KEYS.LANGUAGE],
+    queryFn: getAvailableLanguages,
+  });
 
-  const init = async () => {
-    const result = await supabase.from("dictionaries").select();
-  };
+  const toastId = useRef<number | string>(0);
 
-  useEffect(() => {
-    init();
-  }, []);
+  if (isLoading) {
+    toastId.current = toast.loading("Please wait...");
+  }
 
-  return <Text h2>New dictionary</Text>;
+  if (isFetched) {
+    toast.dismiss();
+  }
+
+  if (isError) {
+    renderErrorToast(toastId.current);
+  }
+
+  return (
+    <>
+      <h2 className="text-2xl mb-4">Select a new language</h2>
+      <div className="grid grid-cols-4 gap-2">
+        {languages?.map((elem) => (
+          <div className="flex w-full border p-2 gap-2 items-center rounded-xl">
+            <p className="text-3xl">{elem.emoji}</p>
+            <p>{elem.name}</p>
+          </div>
+        ))}
+      </div>
+    </>
+  );
 };
